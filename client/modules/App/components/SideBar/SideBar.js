@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { getUserName, getId } from '../../../Login/LoginReducer';
 import { logout } from '../../../Login/LoginActions';
-import { Tab, Row, Col, Nav, NavItem } from'react-bootstrap';
+import { Tab, Row, Col, Nav, NavItem } from 'react-bootstrap';
+import styles from '../../App.css';
 
-class SideBar extends Component{
-  constructor(props){
+class SideBar extends Component {
+  constructor(props) {
     super(props);
     this.state = {
     };
@@ -18,10 +19,10 @@ class SideBar extends Component{
       this.props.dispatch(logout());
     }
   };
-  render(){
+  render() {
     return (
       <Tab.Container id="left-tabs-example" defaultActiveKey="statistic">
-        <Row className="clearfix">
+        <Row className={`clearfix ${styles.sideBar}`}>
           <Nav bsStyle="pills" stacked onSelect={this.handleSelect}>
             <NavItem eventKey="statistic">
               Thống kê
@@ -31,6 +32,9 @@ class SideBar extends Component{
             </NavItem>
             <NavItem eventKey="customer">
               Khách hàng
+            </NavItem>
+            <NavItem eventKey="transaction">
+              Lệnh giao dịch
             </NavItem>
             <NavItem eventKey="setting">
               Cấu hình

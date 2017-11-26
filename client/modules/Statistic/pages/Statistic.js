@@ -19,7 +19,7 @@ class Statistic extends Component {
   // so lenh dat/khop trong ngay
   render() {
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: '20px' }}>
         <Customer />
         <Fee />
         <Order />

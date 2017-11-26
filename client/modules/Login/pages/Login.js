@@ -80,9 +80,9 @@ class Login extends Component {
 
   render() {
     return (
-      <Col xs={12} mdOffset={4} md={4} style={{ top: '35%' }}>
-        <Panel>
-          <Form horizontal>
+      <Col xs={12} mdOffset={4} md={4} style={{ transform: 'translateY(100%)' }}>
+        <Panel header="Đăng nhập trang quản trị">
+          <Form horizontal style={{ paddingLeft: '20px', paddingRight: '20px' }}>
             <FormGroup controlId="formHorizontalEmail">
               <FormControl
                 type="text"
@@ -106,7 +106,7 @@ class Login extends Component {
             </FormGroup>
 
             <FormGroup>
-              <Button block disabled={this.state.isSigningIn} onClick={this.onSigningIn}>
+              <Button bsStyle="success" block disabled={this.state.isSigningIn} onClick={this.onSigningIn}>
                 Đăng nhập
               </Button>
             </FormGroup>

@@ -38,12 +38,12 @@ class Fee extends Component {
 
     this.props.dispatch(getFeeByDay(days, coin)).then((res) => {
       const data = [];
-      res.transaction.map((t, index) => {
+      res.transaction.map((t, index) => (
         data.push({
           label: (index % 7 === 0) ? t.label : '',
           value: (coin === 'USDT') ? t.usdt / Number(usdtUnit) : t.coin / Number(coinUnit),
-        });
-      });
+        })
+      ));
       this.setState({
         data,
       });
@@ -63,21 +63,6 @@ class Fee extends Component {
         showBorder: '0',
       },
       data: this.state.data,
-      // categories: [
-      //   {
-      //     category
-      //   }
-      // ],
-      // dataset: [
-      //   {
-      //     seriesname: 'BTC',
-      //     data: coin,
-      //   },
-      //   {
-      //     seriesname: 'USDT',
-      //     data: usdt,
-      //   },
-      // ],
     };
     const chartConfigs = {
       id: 'revenue-chart',
@@ -90,12 +75,12 @@ class Fee extends Component {
     return (
       <div style={{ width: '45%', minWidth: '500px', margin: 'auto' }}>
         <ReactFC {...chartConfigs} />
-        <DropdownButton title={this.state.selectedCoin} id="bg-nested-dropdown" onSelect={this.changeCoin}>
+        <DropdownButton bsStyle="primary" bsSize="xsmall" title={this.state.selectedCoin} id="bg-nested-dropdown" onSelect={this.changeCoin}>
           <MenuItem eventKey="BTC">BTC</MenuItem>
           <MenuItem eventKey="ETH">ETH</MenuItem>
           <MenuItem eventKey="USDT">USDT</MenuItem>
         </DropdownButton>
-        <DropdownButton title={`${this.state.days} ngày trước`} id="bg-nested-dropdown" onSelect={this.changeDate}>
+        <DropdownButton bsStyle="primary" bsSize="xsmall" title={`${this.state.days} ngày trước`} id="bg-nested-dropdown" onSelect={this.changeDate}>
           <MenuItem eventKey="30">30 ngày trước</MenuItem>
           <MenuItem eventKey="60">60 ngày trước</MenuItem>
           <MenuItem eventKey="90">90 ngày trước</MenuItem>

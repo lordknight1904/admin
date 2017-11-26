@@ -1,6 +1,6 @@
 import bcypher from 'blockcypher';
 
-const bcapi = new bcypher('bcy', 'test', 'fbbd90bc4f6543a2b79275121f751c5a');
+const ethapi = new bcypher('beth', 'test', '7d52d8baf3554ecfa0884b9669459e1e');
 
 import bigi from 'bigi';
 
@@ -11,7 +11,7 @@ import Order from '../models/order';
 
 export function getHash(txHash) {
   return new Promise((resolve, reject) => {
-    bcapi.getTX(txHash, {},(err, data) => {
+    ethapi.getTX(txHash, {},(err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -25,12 +25,11 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
     const newtx = {
       inputs: [{ addresses: [userFrom.address] }],
       outputs: [
-        { addresses: [userTo.address], value: Number(amount) - feeNetwork - feeTrade },
-        { addresses: [addressFee], value: Number(feeTrade) },
+        { addresses: [userTo.address], value: Number(amount) - feeNetwork },
       ],
-      fees: Number(feeNetwork),
+      gas_limit: Number(feeNetwork),
     };
-    bcapi.newTX(newtx, (err, data) => {
+    ethapi.newTX(newtx, (err, data) => {
       if (err) {
         resolve({ code: 'error', error: err });
       } else {
@@ -41,7 +40,8 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        console.log(data);
+        ethapi.sendTX(data, (err2, ret) => {
           if (err2) {
             resolve({ code: 'error', error: err2 });
           } else {
@@ -51,7 +51,7 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
               url: `http://c2e8dfae.ngrok.io/api/trade/${userTo.address}`,
               confirmations: 6
             };
-            bcapi.createHook(webhook2, (err3, d) => {
+            ethapi.createHook(webhook2, (err3, d) => {
             });
             resolve(ret.tx.hash);
           }
@@ -63,7 +63,7 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
 
 export function addAddress() {
   return new Promise((resolve, reject) => {
-    bcapi.genAddr({},(err, data) => {
+    ethapi.genAddr({},(err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -72,12 +72,19 @@ export function addAddress() {
     });
   });
 }
+function printResponse(err, data) {
+  if (err !== null) {
+    console.log(err);
+  } else {
+    console.log(data);
+  }
+}
 export function faucet(address) {
-  bcapi.faucet(address, 500000, () => {});
+  ethapi.faucet(address, 1000000000000000000, printResponse);
 }
 export function getAddress(address) {
   return new Promise((resolve, reject) => {
-    bcapi.getAddr(address, {}, (err, data) => {
+    ethapi.getAddr(address, {}, (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -88,7 +95,7 @@ export function getAddress(address) {
 }
 export function getHold(id) {
   return new Promise((resolve, reject) => {
-    Order.find({ userId: id, coin: 'BTC', type: 'sell', $or: [{ stage: 'open' }] }).exec((err, order) => {
+    Order.find({ userId: id, coin: 'ETH', type: 'sell', $or: [{ stage: 'open' }] }).exec((err, order) => {
       if (err) {
         reject(err);
       } else {
@@ -101,6 +108,9 @@ export function getHold(id) {
     });
   });
 }
+// create transaction, sign and send to the network
+// userFrom -> userTo
+//
 export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addressFee, feeTrade, feeNetwork) {
   return new Promise((resolve, reject) => {
     const amount = (orderSell.amountRemain <= orderBuy.amountRemain) ? orderSell.amountRemain : orderBuy.amountRemain;
@@ -114,14 +124,13 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
     const addressTo = (at.length > 0) ? at[0] : [];
     if (af.length === 0 || at.length === 0) reject('addressError');
     const newtx = {
-      inputs: [{addresses: [addressFrom.address]}],
+      inputs: [{ addresses: [addressFrom.address] }],
       outputs: [
-        {addresses: [addressTo.address], value: Number(amount) - feeNetwork - feeTrade},
-        {addresses: [addressFee], value: Number(feeTrade)}
+        { addresses: [addressTo.address], value: Number(amount) - feeNetwork },
       ],
-      fees: Number(feeNetwork)
+      gas_limit: Number(feeNetwork)
     };
-    bcapi.newTX(newtx, function (err, data) {
+    ethapi.newTX(newtx, (err, data) => {
       if (err) {
         reject('transactionError');
       } else {
@@ -129,22 +138,24 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
         let keys = null;
         keys = new bitcoin.ECPair(bigi.fromHex(addressFrom.private));
         data.pubkeys = [];
-        data.signatures = data.tosign.map((tosign) => {
+        data.signatures = data.tosign.map(function (tosign) {
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        console.log(data);
+        ethapi.sendTX(data, function (err2, ret) {
           if (err2) {
             reject('signError');
           } else {
+            console.log(ret);
             if (ret && !ret.hasOwnProperty('error')) {
               const webhook2 = {
-                event: 'tx-confirmation',
-                address: addressTo.address,
-                url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
+                'event': 'tx-confirmation',
+                'address': addressTo.address,
+                'url': `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
                 confirmations: 6
               };
-              bcapi.createHook(webhook2, () => {
+              ethapi.createHook(webhook2, () => {
               });
               resolve(ret.tx.hash);
             } else {
@@ -163,9 +174,9 @@ export function directTransfer(addressFrom, addressPrivate, addressTo, transferA
       outputs: [
         {addresses: [addressTo], value: Number(transferAmount)}
       ],
-      fees: Number(50000)
+      gas_limit: Number(50000)
     };
-    bcapi.newTX(newtx, (err, data) => {
+    ethapi.newTX(newtx,(err, data) => {
       if (err) {
         reject('transactionError');
       } else {
@@ -180,20 +191,22 @@ export function directTransfer(addressFrom, addressPrivate, addressTo, transferA
             data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
             return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
           });
-          bcapi.sendTX(data, (err2, ret) => {
+          ethapi.sendTX(data, function (err2, ret) {
             if (err2) {
               reject('signError');
             } else {
               if (ret) {
                 const webhook2 = {
-                  event: 'tx-confirmation',
-                  address: addressTo,
-                  url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo}`,
+                  'event': 'tx-confirmation',
+                  'address': addressTo,
+                  'url': `http://c2e8dfae.ngrok.io/api/trade/${addressTo}`,
                   confirmations: 6
                 };
-                bcapi.createHook(webhook2, () => {
+                ethapi.createHook(webhook2, () => {
                 });
-                resolve(ret.tx.hash);
+                console.log(ret);
+                resolve('done');
+                // resolve(ret.tx.hash);
               }
             }
           });

@@ -91,11 +91,11 @@ class Order extends Component {
     return (
       <div style={{ width: '45%', minWidth: '500px', margin: 'auto' }}>
         <ReactFC {...chartConfigs} />
-        <DropdownButton title={this.state.selectedCoin} id="bg-nested-dropdown" onSelect={this.changeCoin}>
+        <DropdownButton bsStyle="primary" bsSize="xsmall" title={this.state.selectedCoin} id="bg-nested-dropdown" onSelect={this.changeCoin}>
           <MenuItem eventKey="BTC">BTC</MenuItem>
           <MenuItem eventKey="ETH">ETH</MenuItem>
         </DropdownButton>
-        <DropdownButton title={`${this.state.days} ngày trước`} id="bg-nested-dropdown" onSelect={this.changeDate}>
+        <DropdownButton bsStyle="primary" bsSize="xsmall" title={`${this.state.days} ngày trước`} id="bg-nested-dropdown" onSelect={this.changeDate}>
           <MenuItem eventKey="30">30 ngày trước</MenuItem>
           <MenuItem eventKey="60">60 ngày trước</MenuItem>
           <MenuItem eventKey="90">90 ngày trước</MenuItem>

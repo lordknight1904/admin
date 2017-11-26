@@ -1,6 +1,6 @@
 import bcypher from 'blockcypher';
 
-const bcapi = new bcypher('bcy', 'test', 'fbbd90bc4f6543a2b79275121f751c5a');
+const usdt = new bcypher('bcy', 'test', '54f58bb28ee74b419188f503b0bf250f');
 
 import bigi from 'bigi';
 
@@ -8,18 +8,6 @@ import bitcoin from 'bitcoinjs-lib';
 import buffer from 'buffer';
 import Order from '../models/order';
 
-
-export function getHash(txHash) {
-  return new Promise((resolve, reject) => {
-    bcapi.getTX(txHash, {},(err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data.confirmations);
-      }
-    });
-  });
-}
 export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, feeTrade, addressFee) {
   return new Promise((resolve) => {
     const newtx = {
@@ -30,7 +18,7 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
       ],
       fees: Number(feeNetwork),
     };
-    bcapi.newTX(newtx, (err, data) => {
+    usdt.newTX(newtx,(err, data) => {
       if (err) {
         resolve({ code: 'error', error: err });
       } else {
@@ -41,7 +29,7 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        usdt.sendTX(data,(err2, ret) => {
           if (err2) {
             resolve({ code: 'error', error: err2 });
           } else {
@@ -51,7 +39,7 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
               url: `http://c2e8dfae.ngrok.io/api/trade/${userTo.address}`,
               confirmations: 6
             };
-            bcapi.createHook(webhook2, (err3, d) => {
+            usdt.createHook(webhook2, (err3, d) => {
             });
             resolve(ret.tx.hash);
           }
@@ -61,9 +49,20 @@ export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, fe
   });
 }
 
+export function getHash(txHash) {
+  return new Promise((resolve, reject) => {
+    usdt.getTX(txHash, {},(err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data.confirmations);
+      }
+    });
+  });
+}
 export function addAddress() {
   return new Promise((resolve, reject) => {
-    bcapi.genAddr({},(err, data) => {
+    usdt.genAddr({},(err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -73,11 +72,11 @@ export function addAddress() {
   });
 }
 export function faucet(address) {
-  bcapi.faucet(address, 500000, () => {});
+  usdt.faucet(address, 500000, () => {});
 }
 export function getAddress(address) {
   return new Promise((resolve, reject) => {
-    bcapi.getAddr(address, {}, (err, data) => {
+    usdt.getAddr(address, {}, (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -88,13 +87,13 @@ export function getAddress(address) {
 }
 export function getHold(id) {
   return new Promise((resolve, reject) => {
-    Order.find({ userId: id, coin: 'BTC', type: 'sell', $or: [{ stage: 'open' }] }).exec((err, order) => {
+    Order.find({ userId: id, type: 'buy', $or: [{ stage: 'open' }] }).exec((err, order) => {
       if (err) {
         reject(err);
       } else {
         let hold = 0;
         order.map((o) => {
-          hold += o.amountRemain;
+          hold += o.amountRemain / 100000 * o.price;
         });
         resolve(hold);
       }
@@ -103,12 +102,26 @@ export function getHold(id) {
 }
 export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addressFee, feeTrade, feeNetwork) {
   return new Promise((resolve, reject) => {
-    const amount = (orderSell.amountRemain <= orderBuy.amountRemain) ? orderSell.amountRemain : orderBuy.amountRemain;
+    let unit = 0;
+    switch (orderSell.coin) {
+      case 'BTC': {
+        unit = 100000000;
+        break;
+      }
+      case 'ETH': {
+        unit = 1000000000000000000;
+        break;
+      }
+      default: unit = 100000000;
+    }
+    const amountCoin = (orderSell.amountRemain <= orderBuy.amountRemain) ? orderSell.amountRemain : orderBuy.amountRemain;
+    const amount = (amountCoin) / unit * 100000 * orderSell.price  - feeNetwork - feeTrade;
+    const amountUsdt = (feeTrade)/ 1000 * orderSell.price;
     const af = userFrom.addresses.filter((a) => {
-      return a.coin === orderSell.coin;
+      return a.coin === 'USDT';
     });
     const at = userTo.addresses.filter((a) => {
-      return a.coin === orderBuy.coin;
+      return a.coin === 'USDT';
     });
     const addressFrom = (af.length > 0) ? af[0] : [];
     const addressTo = (at.length > 0) ? at[0] : [];
@@ -116,12 +129,12 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
     const newtx = {
       inputs: [{addresses: [addressFrom.address]}],
       outputs: [
-        {addresses: [addressTo.address], value: Number(amount) - feeNetwork - feeTrade},
-        {addresses: [addressFee], value: Number(feeTrade)}
+        {addresses: [addressTo.address], value: Number(amount)},
+        {addresses: [addressFee], value: Number(amountUsdt)}
       ],
       fees: Number(feeNetwork)
     };
-    bcapi.newTX(newtx, function (err, data) {
+    usdt.newTX(newtx, function (err, data) {
       if (err) {
         reject('transactionError');
       } else {
@@ -129,22 +142,25 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
         let keys = null;
         keys = new bitcoin.ECPair(bigi.fromHex(addressFrom.private));
         data.pubkeys = [];
-        data.signatures = data.tosign.map((tosign) => {
+        data.signatures = data.tosign.map(function (tosign) {
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        console.log(data);
+        usdt.sendTX(data, function (err2, ret) {
           if (err2) {
             reject('signError');
           } else {
+            // console.log(ret);
             if (ret && !ret.hasOwnProperty('error')) {
+              // console.log(ret);
               const webhook2 = {
-                event: 'tx-confirmation',
-                address: addressTo.address,
-                url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
+                'event': 'tx-confirmation',
+                'address': addressTo.address,
+                'url': `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
                 confirmations: 6
               };
-              bcapi.createHook(webhook2, () => {
+              usdt.createHook(webhook2, () => {
               });
               resolve(ret.tx.hash);
             } else {
@@ -152,52 +168,6 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
             }
           }
         });
-      }
-    });
-  });
-}
-export function directTransfer(addressFrom, addressPrivate, addressTo, transferAmount) {
-  return new Promise((resolve, reject) => {
-    const newtx = {
-      inputs: [{addresses: [addressFrom]}],
-      outputs: [
-        {addresses: [addressTo], value: Number(transferAmount)}
-      ],
-      fees: Number(50000)
-    };
-    bcapi.newTX(newtx, (err, data) => {
-      if (err) {
-        reject('transactionError');
-      } else {
-        if (data.hasOwnProperty('errors')) {
-          reject('not enough fund');
-        } else {
-          if (data.hasOwnProperty('errors') || data.hasOwnProperty('error')) reject('transactionError');
-          let keys = null;
-          keys = new bitcoin.ECPair(bigi.fromHex(addressPrivate));
-          data.pubkeys = [];
-          data.signatures = data.tosign.map((tosign) => {
-            data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
-            return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
-          });
-          bcapi.sendTX(data, (err2, ret) => {
-            if (err2) {
-              reject('signError');
-            } else {
-              if (ret) {
-                const webhook2 = {
-                  event: 'tx-confirmation',
-                  address: addressTo,
-                  url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo}`,
-                  confirmations: 6
-                };
-                bcapi.createHook(webhook2, () => {
-                });
-                resolve(ret.tx.hash);
-              }
-            }
-          });
-        }
       }
     });
   });

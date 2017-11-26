@@ -10,6 +10,7 @@ import admin from './modules/Admin/AdminReducer';
 import customer from './modules/Customer/CustomerReducer';
 import statistic from './modules/Statistic/StatisticReducer';
 import setting from './modules/Setting/SettingReducer';
+import transaction from './modules/Transaction/TransactionReducer';
 
 // Combine all reducers into one root reducer
 export default combineReducers({
@@ -19,4 +20,5 @@ export default combineReducers({
   customer,
   statistic,
   setting,
+  transaction,
 });

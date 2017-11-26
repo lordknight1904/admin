@@ -20,40 +20,39 @@ export function getHash(txHash) {
     });
   });
 }
-export function addressToAddressWithFee(userFrom, userTo, amount, feeNetwork, feeTrade, addressFee) {
+export function addressToAddressWithFee(userFrom, userTo, amount, fee, exchangeFee) {
   return new Promise((resolve) => {
     const newtx = {
-      inputs: [{ addresses: [userFrom.address] }],
+      inputs: [{addresses: [userFrom.address]}],
       outputs: [
-        { addresses: [userTo.address], value: Number(amount) - feeNetwork - feeTrade },
-        { addresses: [addressFee], value: Number(feeTrade) },
+        {addresses: [userTo.address], value: Number(amount)}
       ],
-      fees: Number(feeNetwork),
+      fees: Number(fee)
     };
-    bcapi.newTX(newtx, (err, data) => {
+    bcapi.newTX(newtx, function(err, data) {
       if (err) {
         resolve({ code: 'error', error: err });
       } else {
         let keys = null;
         keys = new bitcoin.ECPair(bigi.fromHex(userFrom.private));
         data.pubkeys = [];
-        data.signatures = data.tosign.map((tosign) => {
+        data.signatures = data.tosign.map( function(tosign) {
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        bcapi.sendTX(data, function (err2, ret) {
           if (err2) {
             resolve({ code: 'error', error: err2 });
           } else {
             const webhook2 = {
-              event: 'tx-confirmation',
-              address: userTo.address,
-              url: `http://c2e8dfae.ngrok.io/api/trade/${userTo.address}`,
+              'event': 'tx-confirmation',
+              'address': userTo.address,
+              'url': `http://c2e8dfae.ngrok.io/api/trade/${userTo.address}`,
               confirmations: 6
             };
             bcapi.createHook(webhook2, (err3, d) => {
             });
-            resolve(ret.tx.hash);
+            resolve({ code: 'done' });
           }
         });
       }
@@ -101,6 +100,9 @@ export function getHold(id) {
     });
   });
 }
+// create transaction, sign and send to the network
+// userFrom -> userTo
+//
 export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addressFee, feeTrade, feeNetwork) {
   return new Promise((resolve, reject) => {
     const amount = (orderSell.amountRemain <= orderBuy.amountRemain) ? orderSell.amountRemain : orderBuy.amountRemain;
@@ -129,19 +131,19 @@ export function transactionWithFee(userFrom, userTo, orderSell, orderBuy, addres
         let keys = null;
         keys = new bitcoin.ECPair(bigi.fromHex(addressFrom.private));
         data.pubkeys = [];
-        data.signatures = data.tosign.map((tosign) => {
+        data.signatures = data.tosign.map(function (tosign) {
           data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
           return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
         });
-        bcapi.sendTX(data, (err2, ret) => {
+        bcapi.sendTX(data, function (err2, ret) {
           if (err2) {
             reject('signError');
           } else {
             if (ret && !ret.hasOwnProperty('error')) {
               const webhook2 = {
-                event: 'tx-confirmation',
-                address: addressTo.address,
-                url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
+                'event': 'tx-confirmation',
+                'address': addressTo.address,
+                'url': `http://c2e8dfae.ngrok.io/api/trade/${addressTo.address}`,
                 confirmations: 6
               };
               bcapi.createHook(webhook2, () => {
@@ -165,7 +167,7 @@ export function directTransfer(addressFrom, addressPrivate, addressTo, transferA
       ],
       fees: Number(50000)
     };
-    bcapi.newTX(newtx, (err, data) => {
+    bcapi.newTX(newtx,(err, data) => {
       if (err) {
         reject('transactionError');
       } else {
@@ -180,15 +182,15 @@ export function directTransfer(addressFrom, addressPrivate, addressTo, transferA
             data.pubkeys.push(keys.getPublicKeyBuffer().toString('hex'));
             return keys.sign(new buffer.Buffer(tosign, 'hex')).toDER().toString('hex');
           });
-          bcapi.sendTX(data, (err2, ret) => {
+          bcapi.sendTX(data, function (err2, ret) {
             if (err2) {
               reject('signError');
             } else {
               if (ret) {
                 const webhook2 = {
-                  event: 'tx-confirmation',
-                  address: addressTo,
-                  url: `http://c2e8dfae.ngrok.io/api/trade/${addressTo}`,
+                  'event': 'tx-confirmation',
+                  'address': addressTo,
+                  'url': `http://c2e8dfae.ngrok.io/api/trade/${addressTo}`,
                   confirmations: 6
                 };
                 bcapi.createHook(webhook2, () => {
