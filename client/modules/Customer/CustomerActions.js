@@ -32,7 +32,14 @@ export function getCustomerSearch(search, page) {
 }
 export function toggleUser(user) {
   return () => {
-    return callApi('user', 'put', '', {user} ).then(res => {
+    return callApi('user', 'put', '', { user }).then(res => {
+      return res;
+    });
+  };
+}
+export function denyUser(user) {
+  return () => {
+    return callApi('user/deny', 'put', '', { user }).then(res => {
       return res;
     });
   };

@@ -65,7 +65,14 @@ export function approveUser(req, res) {
       reqUser.hasOwnProperty('id') &&
       reqUser.hasOwnProperty('approved')
   ) {
-    User.findOneAndUpdate({ _id: mongoose.Types.ObjectId(reqUser.id) }, { approved: !reqUser.approved }, { new: true }).exec((err, user) => {
+    User.findOneAndUpdate(
+      { _id: mongoose.Types.ObjectId(reqUser.id) },
+      {
+        approved: !reqUser.approved,
+        isSubmitting: false,
+      },
+      { new: true })
+      .exec((err, user) => {
       if (err) {
         res.json({ user: 'error' });
       } else {

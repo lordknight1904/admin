@@ -27,7 +27,7 @@ class CustomerList extends Component {
         this.props.dispatch(setNotify('Lỗi duyệt hồ sơ người dùng'));
       }
       if (res.user === 'success') {
-        this.props.dispatch(setNotify('Đã duyệt hồ sơ.'));
+        this.props.dispatch(setNotify('Thao tác hoàn tất.'));
         this.props.dispatch(getCustomerSearch(this.props.search, this.props.currentPage - 1));
       }
     })
@@ -36,12 +36,12 @@ class CustomerList extends Component {
     return (
       <Table striped bordered condensed hover>
         <thead>
-        <tr>
-          <th>Tên tài khoản</th>
-          <th>Ngày tạo</th>
-          <th>Xem thông tin</th>
-          <th>Hồ sơ</th>
-        </tr>
+          <tr>
+            <th>Tên tài khoản</th>
+            <th>Ngày tạo</th>
+            <th>Xem thông tin</th>
+            <th>Thao tác</th>
+          </tr>
         </thead>
         <tbody>
         {
@@ -60,10 +60,10 @@ class CustomerList extends Component {
                 <td>
                   {
                     a.approved ? (
-                        <Button bsStyle="warning" onClick={() => this.onToggleUserProfile(a)} disabled={!a.isSubmitting}>Thu hồi</Button>
-                      ) : (
-                        <Button bsStyle="danger" onClick={() => this.onToggleUserProfile(a)} disabled={!a.isSubmitting}>Duyệt</Button>
-                      )
+                      <Button bsStyle="warning" onClick={() => this.onToggleUserProfile(a)} disabled={!a.isSubmitting}>Thu hồi</Button>
+                    ) : (
+                      <Button bsStyle="danger" onClick={() => this.onToggleUserProfile(a)} disabled={!a.isSubmitting}>Duyệt</Button>
+                    )
                   }
                 </td>
               </tr>
