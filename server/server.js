@@ -20,6 +20,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
   app.use(webpackHotMiddleware(compiler));
 }
+app.use('/public', Express.static('../trade/public'));
 
 // React And Redux Setup
 import { configureStore } from '../client/store';
@@ -39,6 +40,7 @@ import orders from './routes/order.routes';
 import admins from './routes/admin.routes';
 import settings from './routes/setting.routes';
 import transactions from './routes/transaction.routes';
+import deposits from './routes/deposit.routes';
 import serverConfig from './config';
 
 // Set native promises as mongoose promise
@@ -61,7 +63,7 @@ app.use(compression());
 app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.urlencoded({ limit: '20mb', extended: false }));
 app.use(Express.static(path.resolve(__dirname, '../dist/client')));
-app.use('/api', [settings, transactions, admins, orders, trades, users]);
+app.use('/api', [settings, transactions, admins, orders, trades, users, deposits]);
 
 // Render Initial HTML
 const renderFullPage = (html, initialState) => {

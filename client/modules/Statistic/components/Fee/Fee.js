@@ -5,6 +5,7 @@ import { DropdownButton, MenuItem } from 'react-bootstrap';
 import fusionCharts from 'fusioncharts';
 import charts from 'fusioncharts/fusioncharts.charts';
 import ReactFC from 'react-fusioncharts';
+import PowerCharts from 'fusioncharts/fusioncharts.powercharts';
 import { getFeeByDay } from '../../StatisticActions';
 import { getCoinList } from '../../../App/AppReducer';
 
@@ -18,6 +19,7 @@ class Fee extends Component {
       days: 30,
     };
     charts(fusionCharts);
+    PowerCharts(fusionCharts);
   }
   componentDidMount() {
     this.fetchData(this.state.selectedCoin, this.state.days);
@@ -66,7 +68,6 @@ class Fee extends Component {
     };
     const chartConfigs = {
       type: 'candlestick',
-      renderAt: 'chart-container',
       id: 'myChart',
       width: '600',
       height: '400',

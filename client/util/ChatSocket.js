@@ -5,7 +5,7 @@ const io = require('socket.io-client');
 export default class ChatSocket {
   constructor() {
     this.connected = false;
-    this.socket = io.connect('http://localhost:8000');
+    this.socket = io.connect('http://localhost:11212');
   }
   doConnect() {
     this.connected = true;

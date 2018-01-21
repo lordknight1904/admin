@@ -58,8 +58,8 @@ class TransactionList extends Component {
             const time = `${date.getDay()}/${date.getMonth()}/${date.getFullYear()} ${hours}:${minutes}`;
             return (
               <tr key={index}>
-                <td style={{ wordWrap: 'break-word' }}>{a.from.userName}</td>
-                <td style={{ wordWrap: 'break-word' }}>{a.to.userName}</td>
+                <td style={{ wordWrap: 'break-word' }}>{(a.from) ? a.from.userName : ''}</td>
+                <td style={{ wordWrap: 'break-word' }}>{(a.to) ? a.to.userName : ''}</td>
                 <td style={{ wordWrap: 'break-word' }}>{numeral(a.amount / unit).format('0,0.[000000]')}</td>
                 <td>{a.coin}</td>
                 <td style={{ wordWrap: 'break-word' }}>{`${numeral(a.amount / unit * a.price).format('0,0.[000000]')}(${numeral(a.price).format('0,0.[000000]')}/${a.coin})`}</td>

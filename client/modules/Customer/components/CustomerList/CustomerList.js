@@ -50,6 +50,7 @@ class CustomerList extends Component {
             const hours =  date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
             const minutes =  date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
             const time = `${date.getDay()}/${date.getMonth()}/${date.getFullYear()} ${hours}:${minutes}`;
+            console.log(a.approved);
             return (
               <tr key={index}>
                 <td>{a.userName}</td>
@@ -65,6 +66,7 @@ class CustomerList extends Component {
                       <Button bsStyle="danger" onClick={() => this.onToggleUserProfile(a)} disabled={!a.isSubmitting}>Duyệt</Button>
                     )
                   }
+                  <Button onClick={() => this.props.onDeposit(a._id)}>Nạp</Button>
                 </td>
               </tr>
             )
@@ -93,6 +95,7 @@ CustomerList.propTypes = {
   search: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
   onUserProfile: PropTypes.func.isRequired,
+  onDeposit: PropTypes.func.isRequired,
 };
 
 CustomerList.contextTypes = {

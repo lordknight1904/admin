@@ -44,3 +44,10 @@ export function denyUser(user) {
     });
   };
 }
+export function createDeposit(deposit) {
+  return () => {
+    return callApi('deposit', 'post', '', { deposit }).then(res => {
+      return res;
+    });
+  };
+}
