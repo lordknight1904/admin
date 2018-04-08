@@ -12,6 +12,7 @@ export function getTransacitonFee(req, res) {
     const from = new Date();
     const to = new Date();
     from.setDate(today.getDate() - Number(req.params.date));
+    to.setDate(today.getDate() - Number(req.params.date));
     from.setHours(0, 0, 0, 0);
     to.setHours(24, 0, 0, 0);
     Transaction.aggregate([
@@ -38,31 +39,12 @@ export function getTransacitonFee(req, res) {
     ])
       .exec((err, transaction) => {
         if (err) {
-          res.json({ transaction: [] });
+          res.json({ transaction: { id: '', coin: 0, usdt: 0 } });
         } else {
-          let response = [];
-          for (let i = 0; i < req.params.date; i++) {
-            const tD = new Date();
-            tD.setDate(today.getDate() - i);
-            response.push({
-              label: `${tD.getDate()}/${tD.getMonth()}/${tD.getYear() + 1900}`,
-              coin: 0,
-              usdt: 0,
-            });
-          }
-          transaction.map((t) => {
-            const tempDate = new Date(t._id);
-            for (let i = 0; i < req.params.date; i++) {
-              if (response[i].label === `${tempDate.getDate()}/${tempDate.getMonth()}/${tempDate.getYear() + 1900}`) {
-                response[i].coin = t.coin;
-                response[i].usdt = t.usdt;
-              }
-            }
-          });
           if (transaction.length > 0) {
-            res.json({ transaction: response });
+            res.json({ transaction: transaction[0] });
           } else {
-            res.json({ transaction: [] });
+            res.json({ transaction: { id: '', coin: 0, usdt: 0 } });
           }
         }
       });
@@ -74,13 +56,22 @@ export function getTransacitonFee(req, res) {
 export function getTransaction(req, res) {
   const page = req.query.page ? req.query.page : 0;
   const isToggle = req.query.toggle === '1';
+  const date = req.query.date ? req.query.date : 0;
   const regex = new RegExp('.', 'g');
+  const today = new Date();
+  const from = new Date();
+  const to = new Date();
+  from.setDate(today.getDate() - Number(date));
+  to.setDate(today.getDate() - Number(date));
+  from.setHours(0, 0, 0, 0);
+  to.setHours(24, 0, 0, 0);
   Transaction
     .find({
       $or: [
         { txCoin: isToggle ? null : regex },
         { txUsdt: isToggle ? null : regex },
       ],
+      dateCreated: { $gte: from, $lte: to },
     })
     .populate('from', { userName: 1, _id: 0 })
     .populate('to', { userName: 1, _id: 0 })

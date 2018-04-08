@@ -60,6 +60,7 @@
     "react": "^15.6.2",
     "react-addons-update": "^15.6.0",
     "react-bootstrap": "^0.31.3",
+    "react-bootstrap-date-picker": "^5.1.0",
     "react-dom": "^15.6.2",
     "react-fusioncharts": "^1.0.4",
     "react-helmet": "^3.1.0",

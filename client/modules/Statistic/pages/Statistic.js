@@ -21,7 +21,6 @@ class Statistic extends Component {
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: '20px' }}>
         <Customer />
-        <Fee />
         <Order />
       </div>
     );

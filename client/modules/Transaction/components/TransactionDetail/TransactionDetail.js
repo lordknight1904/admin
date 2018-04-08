@@ -66,11 +66,6 @@ class TransactionDetail extends Component {
               </tr>
 
               <tr>
-                <td style={{ fontWeight: 'bold' }}>Usdt transaction hash</td>
-                <td style={{ wordWrap: 'break-word' }}>{transactionDetail.txUsdt}</td>
-              </tr>
-
-              <tr>
                 <td style={{ fontWeight: 'bold' }}>Mức độ xác thực</td>
                 <td>{(this.props.confirmations === -1) ? 'Đang tải' : this.props.confirmations}</td>
               </tr>

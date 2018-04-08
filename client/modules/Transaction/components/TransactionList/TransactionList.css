@@ -1,0 +1,8 @@
+.customTable {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.customTooltip {
+  white-space: normal;
+}

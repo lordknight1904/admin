@@ -59,14 +59,14 @@ export class App extends Component {
             <SocketController />
             {
               (this.props.id === '') ? (
-                <div style={{ backgroundColor: '#b3d5d6', minHeight: '100vh' }}>
+                <div style={{ backgroundColor: '#2f3d45', minHeight: '100vh' }}>
                   <Col md={12}>
                     <Login />
                   </Col>
                 </div>
               ) : (
                 <div className={styles.container}>
-                  <Col md={2} style={{ minHeight: '100vh', backgroundColor: '#3A3532', marginLeft: '-15px', marginTop: '-15px', marginBottom: '-15px' }}>
+                  <Col md={2} style={{ minHeight: '100vh', backgroundColor: '#2f3d45', marginLeft: '-15px', marginTop: '-15px', marginBottom: '-15px' }}>
                     <SideBar />
                   </Col>
                   <Col md={10} style={{ marginTop: '-15px' }}>

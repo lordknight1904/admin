@@ -1,3 +1,9 @@
 .cointain >div {
   width: 100% !important;
 }
+.customPagination {
+  margin: 10px 0 !important;
+}
+.customCheckbox {
+  margin: 0 !important;
+}

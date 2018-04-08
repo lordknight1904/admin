@@ -9,7 +9,35 @@ export const ACTIONS = {
   CLOSE_TRANSACTION: 'CLOSE_TRANSACTION',
   SET_CONFIRMATION: 'SET_CONFIRMATION',
   SET_TX_HASH: 'SET_TX_HASH',
+  SET_TRANSACTION_DATE: 'SET_TRANSACTION_DATE',
+  SET_TRANSACTION_COIN: 'SET_TRANSACTION_COIN',
+  SET_TRANSACTION_FEE: 'SET_TRANSACTION_FEE',
 };
+export function setTransactionCoin(coin) {
+  return {
+    type: ACTIONS.SET_TRANSACTION_COIN,
+    coin,
+  };
+}
+export function setTransactionFee(transaction) {
+  return {
+    type: ACTIONS.SET_TRANSACTION_FEE,
+    transaction,
+  };
+}
+export function fee(count, coin) {
+  return (dispatch) => {
+    return callApi(`transaction/fee/${count}/${coin}`, 'get', '').then(res => {
+      dispatch(setTransactionFee(res.transaction));
+    });
+  };
+}
+export function setDate(date) {
+  return {
+    type: ACTIONS.SET_TRANSACTION_DATE,
+    date,
+  };
+}
 export function setTxHash(txHash) {
   return {
     type: ACTIONS.SET_TX_HASH,
@@ -25,7 +53,7 @@ export function setConfirmation(confirmations) {
 export function setTransactionDetail(transaction) {
   return {
     type: ACTIONS.SET_TRANSACTION_DETAIL,
-    transaction
+    transaction,
   };
 }
 export function getConfirmation(coin, txHash) {
@@ -69,9 +97,9 @@ export function setTransaction(transaction) {
     transaction,
   };
 }
-export function fetchTransaction(page, toggle) {
+export function fetchTransaction(date, page, toggle) {
   return (dispatch) => {
-    return callApi(`transaction?page=${page}&toggle=${toggle}`, 'get', '').then(res => {
+    return callApi(`transaction?date=${date}&page=${page}&toggle=${toggle}`, 'get', '').then(res => {
       dispatch(setTransaction(res.transaction));
       dispatch(setMaxPage(res.count));
       dispatch(setCurrentPage(1));

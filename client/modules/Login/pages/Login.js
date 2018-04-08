@@ -81,7 +81,7 @@ class Login extends Component {
   render() {
     return (
       <Col xs={12} mdOffset={4} md={4} style={{ transform: 'translateY(100%)' }}>
-        <Panel header="Đăng nhập trang quản trị">
+        <Panel header="Đăng nhập trang quản trị Hotcoinex">
           <Form horizontal style={{ paddingLeft: '20px', paddingRight: '20px' }}>
             <FormGroup controlId="formHorizontalEmail">
               <FormControl
